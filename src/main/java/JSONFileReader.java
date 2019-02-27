@@ -1,4 +1,7 @@
-import com.mongodb.*;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
 import org.bson.types.ObjectId;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -7,21 +10,21 @@ import org.json.simple.parser.ParseException;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by Lahiru Abegunawardena on 12/12/2018.
+ * Created by Lahiru Abegunawardena on 1/14/2019.
  */
-public class AnantaSpecificRun {
+public class JSONFileReader {
     String Prod_Id;
     HashMap Dta;
 
-    AnantaSpecificRun(DB db, String prod_id, HashMap data){
+    JSONFileReader(DB db, String prod_id, HashMap data){
         this.Prod_Id = prod_id;
         this.Dta = data;
+        System.out.println("Data print in JSONFileReader : " + this.Dta);
 
         this.getProductEntryData(db);
     }
@@ -57,8 +60,6 @@ public class AnantaSpecificRun {
     public  void readFile(DBObject dbo, String path, DBCollection coll, String token, String product_type){
 
         String path1 =  path + token  + "-" + product_type + ".json";
-//        String path1 =  path + "ananta-" + product_type + ".json";
-
         System.out.println("\npath of the file to read : "+ path1 + "\n");
 
         JSONParser passer = new JSONParser();
@@ -85,7 +86,7 @@ public class AnantaSpecificRun {
 //                e1.printStackTrace();
             }
         } catch (ParseException e) {
-            System.out.println("Parse error found...");
+            System.out.println("Parse error found... " + e);
         }
 
     }
@@ -97,6 +98,7 @@ public class AnantaSpecificRun {
 
         obj3.remove("version");
         obj3.remove("app_id");
+
 
         Object jso_o2 = (Object) obj3;
         System.out.println("File read output as Object : " + jso_o2);
@@ -112,14 +114,13 @@ public class AnantaSpecificRun {
             System.out.println("\n.................................. Matches ..................................");
         }else{
             System.out.println("\n............................... Doesn't Match ...............................");
-
             Map DB_toset = (Map)jso_o2;
             BasicDBObject newDocument = new BasicDBObject();
             newDocument.put("className", "com.ncinga.db.data.ProductEntry");
             newDocument.putAll(DB_toset);
             BasicDBObject searchQuery = new BasicDBObject().append("_id", new ObjectId(this.Prod_Id));
             coll.update(searchQuery, newDocument);
-
+            System.out.println("\n.......................... Successfully updated db ..........................");
 
         }
     }

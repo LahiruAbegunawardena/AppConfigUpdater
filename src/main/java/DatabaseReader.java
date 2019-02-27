@@ -16,29 +16,22 @@ public class DatabaseReader {
         System.out.println("tenant_id : " + tenant_id);
         System.out.println("token     : " + token);
 
-//        String file_path = "/home/dev/app-config/";
-        String file_path = "D:/nCingaApps/AppConfigurations/source/app-config/";
+        String file_path = "/home/dev/app-config/";
+//        String file_path = "C:/Users/ncinga/Desktop/NSP Configurations_Edited/app-config/qa/";
+//        String file_path = "C:/Users/ncinga/Desktop/NSP Configurations_Edited/app-config/prod/";
 
 
         HashMap dataSet = new HashMap<String, String>();
 
-//        System.out.println("\ndataset to pass : " + dataSet + "\n");
-
-//        if(tenant_id.equals("sgt")){
-//            file_path+= "sublime/";
-//        } else if (tenant_id.equals("ncs")|| tenant_id.equals("ncsant")) {
-//
-//            file_path+= "ananta/";
-//        }
-
-        file_path  = file_path + token + "/";
+        file_path  = file_path + tenant_id + "/";
 
         dataSet.put("tenant_id", tenant_id);
         dataSet.put("token", token);
         dataSet.put("path", file_path);
 
-//        MongoClientURI uri = new MongoClientURI("mongodb://nspuser:nCinga123@localhost:27017/NSP_Users");
-        MongoClientURI uri = new MongoClientURI("mongodb://dev_reg_test:123@localhost:27017/dev_reg_qa");
+        MongoClientURI uri = new MongoClientURI("mongodb://nspuser:nCinga123@localhost:27017/NSP_Users");
+//        MongoClientURI uri = new MongoClientURI("mongodb://dev_reg_test:123@localhost:27017/dev_reg_qa");
+//        MongoClientURI uri = new MongoClientURI("mongodb://dev_reg_test:123@localhost:27017/OneAppProd-DevReg");
 
         MongoClient mongoClient = null;
         try {
@@ -46,8 +39,9 @@ public class DatabaseReader {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-
-        DB db = mongoClient.getDB("dev_reg_qa");
+        DB db = mongoClient.getDB("dev_reg");
+//        DB db = mongoClient.getDB("dev_reg_qa");
+//        DB db = mongoClient.getDB("OneAppProd-DevReg");
 
         DBCollection col1 = db.getCollection("ProvisioningProfile");
 
@@ -106,17 +100,7 @@ public class DatabaseReader {
             String prod_id = dbObject.get("product_id").toString();
             String version_no = dbObject.get("version").toString();
 
-            if(data.get("tenant_id").equals("sgt")){
-
-                //create object according to tenant in Sublime
-                SublimeSpecificRun ssr = new SublimeSpecificRun(db, prod_id, data);
-
-
-            } else if ( (data.get("tenant_id").equals("ncs")) || (data.get("tenant_id").equals("ncsant")) ){
-
-                //create object according to tenant in Ananta
-                AnantaSpecificRun asr = new AnantaSpecificRun(db, prod_id, data);
-            }
+            JSONFileReader asr = new JSONFileReader(db, prod_id, data);
         }
     }
 }
